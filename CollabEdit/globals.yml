@@ -1,0 +1,16 @@
+---
+  # Result files
+  RESULTS_DIR: "results"
+
+  # Data files
+  DATA_DIR: "data"
+  STATS_DIR: "data/stats"
+  # Shared method-independent z cache
+  # (layout <model>_MEMIT/<ds>_layer_{}_clamp_{}_case_{}.npz)
+  KV_DIR: "../cache/z"
+
+  # Hyperparameters
+  HPARAMS_DIR: "hparams"
+
+  # Remote URLs
+  REMOTE_ROOT_URL: "https://memit.baulab.info"
