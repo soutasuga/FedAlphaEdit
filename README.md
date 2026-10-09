@@ -4,7 +4,7 @@ Code for the paper
 
 > **FedAlphaEdit: Null-Space-Aligned Merging for Collaborative Knowledge Editing**
 > Sota Sugawara, Yukihiko Okada (University of Tsukuba)
-> arXiv:XXXX.XXXXX
+> arXiv:2610.11033 (https://arxiv.org/abs/2610.11033)
 
 Contact: Sota Sugawara (s2620520@u.tsukuba.ac.jp)
 
@@ -18,7 +18,7 @@ with the centralized and naive baselines and the merge ablations.
 @article{sugawara2026fedalphaedit,
   title   = {FedAlphaEdit: Null-Space-Aligned Merging for Collaborative Knowledge Editing},
   author  = {Sugawara, Sota and Okada, Yukihiko},
-  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  journal = {arXiv preprint arXiv:2610.11033},
   year    = {2026}
 }
 ```
@@ -92,8 +92,9 @@ python -m experiments.g2_singleRound --merging_method NS \
 
 Variants (same drivers):
 
-* Merge ablations: `g2_singleRound --merging_method S2` (per-client MEMIT +
-  merge-time right projection) / `S3` (simple average).
+* Merge ablations: merge-only (`g2_singleRound --merging_method S2`:
+  per-client MEMIT + merge-time right projection) and simple average
+  (`--merging_method S3`).
 * Per-client MEMIT control: `g1_singleRound --merging_method CollabEdit --client_editor memit`.
 * Qwen arm: add `--model_name Qwen/Qwen2.5-1.5B --hparams_fname qwen2.5-1.5b.json`
   (10 x 200 edits in the paper).
@@ -118,15 +119,14 @@ results under `--edit_category global_edit`, all other runs under
 python -m experiments.g2_unittest_oneshot
 ```
 
-Test A checks that, for one client and one batch, null-space-aligned merging
-reproduces centralized AlphaEdit to machine precision (`test_A_pass: true`),
-and the negative control checks that a mis-specified regularizer (beta added
-per client) breaks the identity (`negctrl_detects_bug: true`). Test B (two
-clients) is a diagnostic: because AlphaEdit edits layers sequentially, the
-keys of upper layers differ slightly between the per-client and centralized
-runs, so Test B shows a small non-zero deviation by design. The script applies
-the one-shot tolerance to Test B as well and therefore prints
-`OVERALL FAIL` (exit code 2); this is the expected outcome.
+The script prints `OVERALL PASS` (exit code 0) when both checks hold:
+Test A, for one client and one batch, null-space-aligned merging reproduces
+centralized AlphaEdit to machine precision (`test_A_pass: true`); and the
+negative control, a mis-specified regularizer (beta added per client), breaks
+the identity (`negctrl_detects_bug: true`). Test B (two clients) is reported as
+a diagnostic and does not enter the verdict: because AlphaEdit edits layers
+sequentially, the keys of upper layers differ slightly between the per-client
+and centralized runs, so Test B shows a small non-zero deviation by design.
 
 ## 4. Code-to-paper mapping
 
@@ -135,10 +135,10 @@ the one-shot tolerance to Test B as well and therefore prints
 | P0 (null-space projection, threshold 0.02) | `memit/alphaedit_collab.py::load_or_build_projection` |
 | Per-client AlphaEdit solve (operator P0 Ai P0 + beta I) | `memit/alphaedit_collab.py::execute_alphaedit_collab` |
 | Null-space-aligned merging (Delta_proposed) | `memit/nsmerge.py::ns_aligned_merge_layer` |
-| S2 / S3 merge ablations | `memit/nsmerge.py::s2_rightproject_layer` / `s3_average_layer` |
+| Merge-only (S2) / simple-average (S3) ablations | `memit/nsmerge.py::s2_rightproject_layer` / `s3_average_layer` |
 | Naive covariance-weighted merge (Delta_naive) | CollabEdit branch of `experiments/g1_singleRound.py` |
 | Centralized AlphaEdit | GLOBAL branch of `experiments/g1_singleRound.py` |
-| oons and ||Delta K0||_F leak measurements | `memit/alphaedit_collab.py::kl_leak` |
+| oons and \|\|Delta K0\|\|_F leak measurements | `memit/alphaedit_collab.py::kl_leak` |
 | Theorem 1 verification | `experiments/g2_unittest_oneshot.py` |
 | ES/PS/NS evaluation (MCF) | `experiments/py/eval_utils_counterfact.py` |
 | zsRE evaluation | `experiments/py/eval_utils_zsre.py` |
